@@ -5,8 +5,8 @@
   -->
 
   <!-- User Information -->
-  <user value=""/>         <!-- Enter your user name here -->
-  <team value=""/>         <!-- Your team number -->
+  <user value="Customer0"/>         <!-- Enter your user name here -->
+  <team value="52737"/>         <!-- Your team number -->
   <passkey value=""/>      <!-- 32 hexadecimal characters if provided -->
 
   <power value="full"/>    <!-- Throttling this at K8s level -->

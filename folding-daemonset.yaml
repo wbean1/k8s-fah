@@ -28,7 +28,18 @@ spec:
       #   effect: NoSchedule
       containers:
         - name: fah-cpu
-          image: "richstokes20/fah-covid:latest"
+          image: "czero/fah:latest"
+          livenessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - 'tail -n 1 log.txt | grep -v ''Exception: Could not get an assignment'''
+            failureThreshold: 1
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
           # --run-as UID should match runAsUser value in containers securityContext
           command:
             - "/usr/bin/FAHClient"
@@ -41,12 +52,12 @@ spec:
             - "--gpu=true"
           resources:
             limits:
-              cpu: 1000m # How much CPU you wish to donate per node
+              cpu: 6500m # How much CPU you wish to donate per node
               memory: 512Mi
               # nvidia.com/gpu: "1"
             requests:
               cpu: 100m
-              memory: 512Mi
+              memory: 256Mi
               # nvidia.com/gpu: "1"
           # Make the container harder to break out of or exploit
           securityContext:
@@ -63,19 +74,19 @@ spec:
         - name: fahclient
           emptyDir: {}
         # Uncomment if using ConfigMap config.xml
-        # - name: fah-cpu-config
-        #   configMap:
-        #     name: foldingathome-config
+        - name: fah-cpu-config
+          configMap:
+            name: foldingathome-config
       initContainers:
         - name: copy-config
           imagePullPolicy: Always
-          image: "richstokes20/fah-covid:latest"
+          image: "czero/fah:latest"
           command:
             - "sh"
             - "-c"
-            - "cp /etc/fahclient/config.xml /var/lib/fahclient/config.xml"
+            # - "cp /etc/fahclient/config.xml /var/lib/fahclient/config.xml"
             # Use this cp command instead if using ConfigMap config.xml
-            # - "cp /etc/fahclient-config/config.xml /var/lib/fahclient/config.xml"
+            - "cp /etc/fahclient-config/config.xml /var/lib/fahclient/config.xml"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1234
@@ -85,8 +96,8 @@ spec:
             - mountPath: /var/lib/fahclient
               name: fahclient
             # Uncomment if using ConfigMap config.xml
-            # - name: fah-cpu-config
-            #   mountPath: /etc/fahclient-config
+            - name: fah-cpu-config
+              mountPath: /etc/fahclient-config
       # priorityClassName: low-priority-class
 ---
 apiVersion: v1
@@ -102,8 +113,8 @@ data:
       -->
 
       <!-- User Information -->
-      <user value=""/> <!-- Enter your user name here -->
-      <team value=""/>         <!-- Your team number -->
+      <user value="Customer0"/> <!-- Enter your user name here -->
+      <team value="52737"/>         <!-- Your team number -->
       <passkey value=""/>       <!-- 32 hexadecimal characters if provided -->
 
       <power value="full"/>     <!-- Throttling this at K8s level -->
